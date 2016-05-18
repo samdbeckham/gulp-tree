@@ -1,14 +1,10 @@
-var fs, handle, path, tree, yaml, marked;
+var fs, handle, jsyaml, path, tree, yaml;
 
 fs = require('fs');
 jsyaml = require('js-yaml');
-marked = require('marked'); // markdown processor
 path = require('path');
-var util = require('gulp-util');
 
 var through = require("through2");
-var es = require("event-stream");
-
 
 var generateTree = function(param){
 
@@ -16,7 +12,8 @@ var generateTree = function(param){
 
   var params = param || {},
       patternsPath = path.resolve(params.patternsPath || './src/patterns'),
-      jsonPath = path.resolve(params.jsonPath || './src/json/')
+      jsonPath = path.resolve(params.jsonPath || './src/json/'),
+      appPath = path.resolve(params.appPath || './src/')
 
   var stream = through.obj(function (file, enc, callback) {
 
@@ -73,11 +70,6 @@ var generateTree = function(param){
       }
 
       return files;
-
-
-
-
-
   });
 
   var excludedExtension = ['.png', '.jpg', '.git', '.jpeg', '.gif', '.html'];
@@ -91,11 +83,10 @@ var generateTree = function(param){
           return 'error: root does not exist';
       }
       info = {
-          path: root.replace(path.join(process.cwd(),'src/'), ''),
+          path: root.replace(path.join(appPath), ''),
           name: path.basename(root).replace(/^\d./, ''),
           slug: path.basename(root)
       };
-
 
       if (ring.isDirectory()) {
 
@@ -167,22 +158,6 @@ var generateTree = function(param){
           if(Object.keys(info.meta).length < 1){
             delete(info.meta)
           }
-
-
-      } else if (ring.isSymbolicLink()) {
-          info.type = 'link';
-      } else {
-          info.type = 'unknown';
-      }
-      return info;
-
-  }
-
-  return stream;
-
-}
-
-module.exports = generateTree;
 
       } else if (ring.isSymbolicLink()) {
           info.type = 'link';
